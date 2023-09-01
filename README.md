@@ -1,97 +1,39 @@
-# Introduction
-Create Private DNS zone with option to attach virtual network for autoregistration.
-SOA record tags will always align with the Private DNS zone tags.
+## Requirements
 
-# Version
-| Version | Date | Release Notes | Author |
-|---|---|---|---|
-| 1.0 | July22 | First release | viktor.lee |
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.6 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.71.0 |
 
-# Developed On
-| Module Version | Terraform Version | AzureRM Version |
-|---|---|---|
-| 1.0 | 1.1.7 | 3.13.0 |
+## Providers
 
-# Module Dependencies
-There are no dependencies
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.71.0 |
 
-| Module Name | Description | Tested Version |
-|---|---|---|
+## Modules
 
+No modules.
 
-# Required Parameters
-| Parameter Name | Description | Type |
-|---|---|---|
-| name | Name of the DNS zone | string |
-| resource_group_name | Name of the RG | string |
-| tags | Azure Tags | map |
+## Resources
 
+| Name | Type |
+|------|------|
+| [azurerm_private_dns_zone.privatednszone](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.vnetlink](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) | resource |
 
+## Inputs
 
-# Optional/Advance Parameters
-Reference for DNS private zone resource provider: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_name"></a> [name](#input\_name) | (Required) Name of the Bastion | `string` | n/a | yes |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | (Required) Name of the resource group where to create the Bastion | `string` | n/a | yes |
+| <a name="input_soa_record"></a> [soa\_record](#input\_soa\_record) | (Optional) SOA record block | <pre>object({<br>    email        = string<br>    expire_time  = number<br>    minimum_ttl  = number<br>    refresh_time = number<br>    retry_time   = number<br>    ttl          = number<br>  })</pre> | `null` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | (Required) map of tags for the deployment | `map(any)` | n/a | yes |
+| <a name="input_virtual_network_ids"></a> [virtual\_network\_ids](#input\_virtual\_network\_ids) | (Optional) virtual\_network\_ids to link to the private dns zone | <pre>list(object({<br>    id                   = string<br>    registration_enabled = bool<br>  }))</pre> | `null` | no |
 
-Reference for DNS private zone virtual network link resource provider: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link
+## Outputs
 
-| Parameter Name | Description | Default Value | Type |
-|---|---|---|---|
-| soa_record | SOA record block. Tags are not exposed and always uses the DNS private zone tags | null | object({<br/>email = string<br/>expire_time = number<br/>minimum_ttl = number<br/>refresh_time = number<br/>retry_time = number<br/>ttl = number<br/>}) |
-| virtual_network_ids | virtual_network_ids to link to the private dns zone | null | list(object({<br/>id= string<br/>registration_enabled = bool<br/>})) |
-
-
-# Outputs
-
-| Parameter Name | Description | Type |
-|---|---|---|
-| zone_out | Output of private DNS zone object | any |
-
-# Additional details
-## Simple code sample
-```
-module "privatednszone" {
-  source              = "./PrivateDNSZone"
-  name = "mydomaintest.com"
-  resource_group_name = azurerm_resource_group.avatest.name
-  tags         = {
-    environment = "sandbox"
-  }
-}
-```
-## Sample creation of DNS zone with custom SOA and 2 vnet integration
-```
-module "privatednszone" {
-  source              = "./PrivateDNSZone"
-  name = "mydomaintest.com"
-  resource_group_name = azurerm_resource_group.avatest.name
-  tags         = {
-    environment = "sandbox"
-  }
-  virtual_network_ids = [{
-    id = module.vnetmodule.vnet_out.id
-    registration_enabled = true
-  },
-  {
-    id = azurerm_virtual_network.example.id
-    registration_enabled = true
-  }]
-  soa_record = {
-    email = "admin.test.com"
-    expire_time = 2419200
-    minimum_ttl = 10
-    refresh_time = 3600
-    retry_time = 300
-    ttl = 3600
-  }
-}
-```
-## Sample creation of DNS records in the zone
-Below show the creation of a record, use the same method for other types of DNS records using the respective resource providers.
-```
-resource "azurerm_private_dns_a_record" "example" {
-  name                = "test"
-  zone_name           = module.privatedns.zone_out.name
-  resource_group_name = azurerm_resource_group.avatest.name
-  ttl                 = 300
-  records             = ["10.0.180.17"]
-}
-```
+| Name | Description |
+|------|-------------|
+| <a name="output_zone_out"></a> [zone\_out](#output\_zone\_out) | n/a |
